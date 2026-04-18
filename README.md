@@ -511,22 +511,22 @@ Deployment Targets: 3+ (Vercel, Railway, Docker)
 
 ## 🗺️ Roadmap
 
-### Q1 2024
+### Q1 2026
 - ✅ MVP Launch
 - ✅ User feedback
 - ✅ Performance optimization
 
-### Q2 2024
+### Q2 2026
 - 🔄 Video mock interviews
 - 🔄 Peer conversation feature
 - 🔄 Premium subscription tier
 
-### Q3 2024
+### Q3 2026
 - 🔄 Mobile app (React Native)
 - 🔄 Advanced analytics
 - 🔄 Leaderboards
 
-### Q4 2024
+### Q4 2026
 - 🔄 AI-powered lesson generation
 - 🔄 Certificate issuance
 - 🔄 B2B partnerships
