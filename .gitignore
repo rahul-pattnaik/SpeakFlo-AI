@@ -1,0 +1,11 @@
+.npm-cache/
+backend/.env
+backend/venv/
+backend/.codex-temp/
+backend/**/__pycache__/
+*.pyc
+frontend/.env.local
+frontend/.next/
+frontend/node_modules/
+frontend/.next-dev.err.log
+frontend/.next-dev.out.log
