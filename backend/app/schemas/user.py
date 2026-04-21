@@ -3,22 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class UserCreate(BaseModel):
-    name: str
-    email: str
-    level: str = "Beginner"
-
-
-class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    email: str
-    level: str
-    created_at: datetime
-
-
 class AuthUserResponse(BaseModel):
     id: int
     email: str
@@ -32,6 +16,16 @@ class ProfileResponse(AuthUserResponse):
     email_verified: bool
     created_at: datetime
     updated_at: datetime | None
+
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    email: str
+    level: str
+    created_at: datetime
 
 
 def auth_user_from_user(user) -> AuthUserResponse:

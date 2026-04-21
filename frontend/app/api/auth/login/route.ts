@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { setAuthCookies } from "@/lib/auth-session";
-import { ensureProfile, getProfile, signInWithPassword } from "@/lib/supabase-rest";
+import { loginWithBackend } from "@/lib/backend-auth";
 
 export async function POST(request: Request) {
   try {
@@ -17,29 +17,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await signInWithPassword({ email, password });
-    const userMetadata = session.user.user_metadata ?? {};
-
-    let profile = await getProfile(session.user.id);
-    if (!profile) {
-      profile = await ensureProfile({
-        id: session.user.id,
-        email: session.user.email ?? email,
-        full_name: String(userMetadata.full_name ?? "Learner"),
-        english_level: String(userMetadata.english_level ?? "Beginner"),
-      });
-    }
-
-    setAuthCookies(await cookies(), session);
+    const result = await loginWithBackend({ email, password });
+    setAuthCookies(await cookies(), result.tokens);
 
     return NextResponse.json({
-      user: profile,
+      message: `Welcome back, ${result.user.full_name}.`,
+      user: result.user,
     });
   } catch (error) {
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Could not sign in.",
+        message: error instanceof Error ? error.message : "Could not sign in.",
       },
       { status: 401 }
     );

@@ -20,10 +20,6 @@ export function getSupabaseServiceRoleKey() {
   return readEnv("SUPABASE_SERVICE_ROLE_KEY");
 }
 
-export function getOpenAIApiKey() {
-  return process.env.OPENAI_API_KEY ?? "";
-}
-
-export function getOpenAIModel() {
-  return process.env.OPENAI_TEXT_MODEL ?? "gpt-5.4-mini";
+export function getBackendApiUrl() {
+  return readEnv("BACKEND_API_URL", "http://localhost:8000");
 }

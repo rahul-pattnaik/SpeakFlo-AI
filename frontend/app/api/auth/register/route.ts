@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { setAuthCookies } from "@/lib/auth-session";
-import { ensureProfile, signUpWithPassword } from "@/lib/supabase-rest";
+import { registerWithBackend } from "@/lib/backend-auth";
 
 type RegisterRequest = {
   full_name?: string;
@@ -33,55 +33,23 @@ function validate(payload: RegisterRequest) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RegisterRequest;
-    const { fullName, email, password, englishLevel } = validate(body);
+    const { fullName, email, password } = validate(body);
 
-    const result = await signUpWithPassword({
+    const result = await registerWithBackend({
       email,
       password,
       full_name: fullName,
-      english_level: englishLevel,
     });
 
-    const session = "access_token" in (result ?? {}) ? result : result?.session;
-    const user = session?.user ?? result?.user;
+    setAuthCookies(await cookies(), result.tokens);
 
-    if (!user?.id || !user.email) {
-      return NextResponse.json(
-        {
-          message:
-            "Account created. If email confirmation is enabled in Supabase, confirm your email before logging in.",
-          requires_email_confirmation: true,
-        },
-        { status: 201 }
-      );
-    }
-
-    await ensureProfile({
-      id: user.id,
-      email: user.email,
-      full_name:
-        String(user.user_metadata?.full_name ?? fullName) || fullName,
-      english_level:
-        String(user.user_metadata?.english_level ?? englishLevel) || englishLevel,
-    });
-
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
-        user: {
-          id: user.id,
-          email: user.email,
-          full_name: String(user.user_metadata?.full_name ?? fullName),
-          english_level: String(user.user_metadata?.english_level ?? englishLevel),
-        },
+        message: `Welcome to SpeakFlo, ${result.user.full_name}.`,
+        user: result.user,
       },
       { status: 201 }
     );
-
-    if (session?.access_token && session.refresh_token) {
-      setAuthCookies(await cookies(), session);
-    }
-
-    return response;
   } catch (error) {
     return NextResponse.json(
       {

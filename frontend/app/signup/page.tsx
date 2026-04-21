@@ -44,6 +44,7 @@ export default function SignupPage() {
       }
 
       router.push("/dashboard");
+      router.refresh();
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Could not create account."
@@ -68,7 +69,7 @@ export default function SignupPage() {
               "Gentle sentence correction with clear explanations",
               "Daily vocabulary practice with revision memory",
               "Grammar coaching in simple English",
-              "Speaking-ready flow built for transcript and voice growth",
+              "Secure session cookies and protected learning routes",
             ].map((item) => (
               <div
                 key={item}
@@ -152,7 +153,10 @@ export default function SignupPage() {
 
           <p className="mt-6 text-sm text-stone-600">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-stone-950 underline-offset-4 hover:underline">
+            <Link
+              href="/login"
+              className="font-semibold text-stone-950 underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

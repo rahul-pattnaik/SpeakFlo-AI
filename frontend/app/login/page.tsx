@@ -10,13 +10,15 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setSubmitting(true);
-    setMessage("");
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -32,9 +34,16 @@ export default function LoginPage() {
         throw new Error(data.message || "Could not sign in.");
       }
 
-      router.push("/dashboard");
+      setSuccessMessage(data.message || "Signed in successfully.");
+      const nextPath = new URLSearchParams(window.location.search).get("next");
+      const destination =
+        nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard";
+      router.push(destination);
+      router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not sign in.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Could not sign in."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -79,15 +88,24 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {message && (
+          {successMessage && (
+            <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {successMessage}
+            </p>
+          )}
+
+          {errorMessage && (
             <p className="mt-4 rounded-2xl bg-stone-100 px-4 py-3 text-sm text-stone-700">
-              {message}
+              {errorMessage}
             </p>
           )}
 
           <p className="mt-6 text-sm text-stone-600">
             New to SpeakFlo?{" "}
-            <Link href="/signup" className="font-semibold text-stone-950 underline-offset-4 hover:underline">
+            <Link
+              href="/signup"
+              className="font-semibold text-stone-950 underline-offset-4 hover:underline"
+            >
               Create an account
             </Link>
           </p>
@@ -102,8 +120,14 @@ export default function LoginPage() {
           </h2>
           <div className="mt-8 space-y-4 text-sm leading-7 text-stone-300">
             <p>Practice conversation, grammar, vocabulary, and speaking in one place.</p>
-            <p>Each session saves corrections, revision words, and weak areas so the next session feels more personal.</p>
-            <p>The architecture is optimized for fast shipping: Next.js, Supabase, and focused AI calls only when needed.</p>
+            <p>
+              Each session saves corrections, revision words, and weak areas so the
+              next session feels more personal.
+            </p>
+            <p>
+              The auth flow uses secure HTTP-only cookies so login state stays on the
+              server where it belongs.
+            </p>
           </div>
         </section>
       </div>

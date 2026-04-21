@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SpeakFlo AI",
-  description: "AI-powered spoken English coaching with conversation, vocabulary, grammar, and speaking practice.",
+  description:
+    "AI-powered spoken English coaching with conversation, vocabulary, grammar, and speaking practice.",
 };
 
 export default function RootLayout({

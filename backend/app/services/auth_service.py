@@ -48,7 +48,7 @@ class AuthService:
             email=email,
             level="Beginner",
             password_hash=hash_password(payload.password),
-            email_verified=payload.auth_provider != "email",
+            email_verified=False,
             is_active=True,
             subscription_tier="free",
         )

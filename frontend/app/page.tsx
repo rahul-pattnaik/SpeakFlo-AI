@@ -63,10 +63,10 @@ export default function Home() {
               </p>
               <div className="mt-6 space-y-4">
                 {[
-                  "Create account with Supabase Auth",
-                  "Start a learning session in one click",
-                  "Get structured AI feedback with corrections and explanations",
-                  "Save progress, weak areas, and revision words automatically",
+                  "Create account with secure email and password auth",
+                  "Stay signed in with short-lived access and refresh cookies",
+                  "Reach the dashboard only through protected routes",
+                  "Sign out cleanly from any authenticated page",
                 ].map((item) => (
                   <div
                     key={item}

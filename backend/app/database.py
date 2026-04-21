@@ -1,32 +1,45 @@
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.engine import make_url
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from .core.config import settings
 
 if not settings.database_url:
     raise RuntimeError("DATABASE_URL is not configured.")
 
-connect_args = {}
-if settings.database_url.startswith("postgresql"):
-    parsed_url = make_url(settings.database_url)
-    hostname = parsed_url.host or ""
-    local_hosts = {"localhost", "127.0.0.1"}
-    if hostname not in local_hosts:
-        connect_args["sslmode"] = settings.database_ssl_mode
+
+def _build_connect_args():
+    database_url = settings.database_url
+    if database_url.startswith("sqlite"):
+        return {"check_same_thread": False}
+
+    if database_url.startswith("postgresql"):
+        parsed_url = make_url(database_url)
+        hostname = parsed_url.host or ""
+        local_hosts = {"localhost", "127.0.0.1"}
+        if hostname not in local_hosts:
+            return {"sslmode": settings.database_ssl_mode}
+
+    return {}
+
 
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
     pool_recycle=300,
-    connect_args=connect_args,
+    connect_args=_build_connect_args(),
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
 def init_db():
+    from .models import User
+
     Base.metadata.create_all(bind=engine)
+
+    if settings.database_url.startswith("sqlite"):
+        return
 
     migration_statements = [
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)",
@@ -39,28 +52,6 @@ def init_db():
         "UPDATE users SET email_verified = FALSE WHERE email_verified IS NULL",
         "UPDATE users SET subscription_tier = 'free' WHERE subscription_tier IS NULL",
         "UPDATE users SET updated_at = created_at WHERE updated_at IS NULL",
-        """
-        CREATE TABLE IF NOT EXISTS coach_interactions (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL REFERENCES users(id),
-            mode VARCHAR(50) NOT NULL,
-            user_input TEXT NOT NULL,
-            agent_response TEXT NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        )
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS weak_words (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL REFERENCES users(id),
-            word VARCHAR(100) NOT NULL,
-            error_count INTEGER NOT NULL DEFAULT 0,
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        )
-        """,
-        "CREATE INDEX IF NOT EXISTS ix_coach_interactions_user_id ON coach_interactions(user_id)",
-        "CREATE INDEX IF NOT EXISTS ix_weak_words_user_id ON weak_words(user_id)",
-        "CREATE INDEX IF NOT EXISTS ix_weak_words_word ON weak_words(word)",
     ]
 
     with engine.begin() as connection:
